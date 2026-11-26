@@ -12,7 +12,8 @@ run-name: Check every site
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    # minutes 3, 8, 13…: off the top of the hour, when GitHub's scheduler is busiest
+    - cron: '3-58/5 * * * *'
   # also right away when the probe or the site list changes
   push:
     branches: [main]
@@ -29,6 +30,7 @@ on:
 permissions:
   contents: write
   issues: write
+  actions: write
   id-token: write
   attestations: write
 
@@ -40,7 +42,12 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     timeout-minutes: 8
+    outputs:
+      started: ${{ steps.start.outputs.at }}
     steps:
+      - id: start
+        run: echo "at=$(date +%s)" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v7
@@ -89,3 +96,34 @@ jobs:
             git rebase -q FETCH_HEAD || { git rebase --abort; exit 1; }
           done
           exit 1
+
+  # GitHub's scheduler is "best effort" and sometimes ignores a new repo's
+  # schedule for hours. Until scheduled runs show up, each run starts the next
+  # one 5 minutes after it began. Once the schedule works, this does nothing.
+  keep-going:
+    needs: probe
+    if: ${{ !cancelled() && github.event_name != 'schedule' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Start the next check in 5 minutes, unless the schedule is running
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STARTED: ${{ needs.probe.outputs.started }}
+        run: |
+          set -euo pipefail
+          runs() { gh api "repos/$GITHUB_REPOSITORY/actions/workflows/probe.yml/runs?$1" --jq "$2"; }
+          LAST=$(runs 'event=schedule&per_page=1' '.workflow_runs[0].created_at // empty')
+          if [ -n "$LAST" ] && [ $(( $(date +%s) - $(date -d "$LAST" +%s) )) -lt 1200 ]; then
+            echo "GitHub's schedule is running (last scheduled run $LAST). Nothing to do."
+            exit 0
+          fi
+          WAIT=$(( ${STARTED:-$(date +%s)} + 300 - $(date +%s) ))
+          [ "$WAIT" -le 0 ] || sleep "$WAIT"
+          WAITING=$(runs 'status=queued&per_page=5' '.total_count')
+          if [ "$WAITING" -gt 0 ]; then
+            echo "A check is already waiting to run. Nothing to do."
+            exit 0
+          fi
+          gh workflow run probe.yml --ref main --repo "$GITHUB_REPOSITORY"
+          echo "Started the next check (GitHub's schedule hasn't run in the last 20 minutes)."
