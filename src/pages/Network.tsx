@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { HourBars, LineChart } from '../components/charts'
 import { BrowserTest, VerifyData } from '../components/proof'
-import { Receipt, SHIPYARD, ServedBy, Stat, StatusPill, statusOf, type Status } from '../components/ui'
+import { Receipt, ServedBy, Stat, StatusPill, statusOf, type Status } from '../components/ui'
 import { ago, duration, pct, PROBE_RUNS, secs, useSummary, when, type Loaded } from '../lib/data'
 import { percentile, slug, type SiteSummary } from '../lib/model'
 import { href } from '../lib/route'
@@ -213,7 +213,7 @@ function Cta() {
         </div>
         <div className="flex flex-wrap gap-2">
           <a href={href.how('add')} className="bg-white px-4 py-2.5 text-sm font-semibold text-ink hover:bg-accentSoft">Add your site</a>
-          <a href={SHIPYARD} target="_blank" rel="noopener" className="border border-[#4a4c57] px-4 py-2.5 text-sm font-semibold hover:border-white">No site yet? Shipyard ↗</a>
+          <a href={href.how('run')} className="border border-[#4a4c57] px-4 py-2.5 text-sm font-semibold hover:border-white">Run your own Watchtower</a>
         </div>
       </div>
     </section>

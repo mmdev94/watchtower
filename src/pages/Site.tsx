@@ -1,6 +1,6 @@
 import { HourBars, LineChart, Phases } from '../components/charts'
 import { BrowserTest, CodeLine } from '../components/proof'
-import { Receipt, SHIPYARD, ServedBy, Stat, StatusPill, statusOf } from '../components/ui'
+import { Receipt, ServedBy, Stat, StatusPill, statusOf } from '../components/ui'
 import { DATA, DATA_TREE, duration, pct, secs, useSummary, when } from '../lib/data'
 import { reasonOf, slug as slugOf } from '../lib/model'
 import { href } from '../lib/route'
@@ -28,7 +28,6 @@ export function SitePage({ slug }: { slug: string }) {
   const last = s.last
   const badge = `${DATA}/badges/${slug}.svg`
   const badgeMd = `[![Uptime on ms.computer](${badge})](${SITE_URL}#/site/${slug})`
-  const viaShipyard = s.repo === 'mmdev94/shipyard' || s.repo === 'mmdev94/shipyard-test'
 
   return (
     <>
@@ -120,14 +119,6 @@ export function SitePage({ slug }: { slug: string }) {
         </div>
       </section>
 
-      {!viaShipyard && (
-        <section className="mx-auto max-w-shell px-5 pt-12 md:px-8">
-          <p className="border border-accent/40 bg-accentSoft/50 p-5 text-[15px] text-ink2">
-            Is this your site? <a href={SHIPYARD} target="_blank" rel="noopener" className="font-semibold text-accent underline underline-offset-2">Shipyard</a> can redeploy it on every
-            push to GitHub, at this same address.
-          </p>
-        </section>
-      )}
     </>
   )
 }

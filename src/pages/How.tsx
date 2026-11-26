@@ -88,8 +88,8 @@ export function How() {
         <Block id="add" title="Add your site">
           <p>
             <strong>Have a GitHub repo for it?</strong> Add the topic <code className="font-mono text-[14px]">ms-computer</code> (⚙ next to <em>About</em> on the repo page) and set{' '}
-            <em>Website</em> to your <code className="font-mono text-[14px]">…ms.computer</code> address. Watchtower looks for tagged repos once an hour. Sites deployed with{' '}
-            <A to="https://shipyard-h0413.ms.computer">Shipyard</A> don’t need the Website field — it reads the address from the deploys.
+            <em>Website</em> to your <code className="font-mono text-[14px]">…ms.computer</code> address. Watchtower looks for tagged repos once an hour. If the Website field is empty, it also looks at the repo’s latest GitHub deployment to an
+            environment named <code className="font-mono text-[14px]">ms-computer</code>.
           </p>
           <p>
             <strong>No repo?</strong> <A to={`${GH}/issues/new?template=add-site.yml`}>Open an issue with the address</A> and it gets added to{' '}
@@ -102,7 +102,7 @@ export function How() {
           </p>
         </Block>
 
-        <Block title="Run your own Watchtower">
+        <Block id="run" title="Run your own Watchtower">
           <p>
             Fork <A to={GH}>the repo</A>. The probe starts on its own schedule in your account (Actions are free for public repos) and writes to your fork’s data branch.
             Or run one check on your own computer:

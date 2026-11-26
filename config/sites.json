@@ -1,8 +1,6 @@
 {
   "about": "Sites Watchtower checks besides every repo tagged ms-computer on GitHub. To be removed, open an issue or add your address to exclude.",
   "sites": [
-    { "url": "https://shipyard-h0413.ms.computer", "name": "Shipyard", "repo": "mmdev94/shipyard" },
-    { "url": "https://shipyard-test-r3602.ms.computer", "name": "Shipyard demo", "repo": "mmdev94/shipyard-test" },
     { "url": "https://the-1024-g4125.ms.computer", "name": "The 1024" },
     { "url": "https://nexus24-a9829.ms.computer", "name": "NEXUS24" },
     { "url": "https://deploy-doctor-d1556.ms.computer", "name": "Deploy Doctor" },

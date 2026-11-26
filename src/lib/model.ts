@@ -188,10 +188,10 @@ export function summarize(runs: Run[], sites: Site[], now: Date, run: Run['run']
   return { v: 1, generated: now.toISOString(), run, hours, runsPerHour, from, sites: summaries }
 }
 
-/** "shipyard-h0413" from "https://shipyard-h0413.ms.computer" — the id used in page addresses and file names. */
+/** "chrono-n2732" from "https://chrono-n2732.ms.computer" — the id used in page addresses and file names. */
 export const slug = (url: string) => new URL(url).hostname.replace(/\.ms\.computer$/, '')
 
-/** "Shipyard" from "shipyard-h0413": drops the random suffix ms.computer adds. */
+/** "Chrono" from "chrono-n2732": drops the random suffix ms.computer adds. */
 export function nameFromHost(host: string): string {
   const base = host.replace(/\.ms\.computer$/, '').replace(/-[a-z]\d{4}$/, '')
   return base.replace(/[-_]+/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase())

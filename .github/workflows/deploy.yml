@@ -1,0 +1,186 @@
+# Deploys the Watchtower site to ms.computer on every push to main.
+#
+# The site is static: it reads the probe's data straight from the `data`
+# branch, so it only needs redeploying when the site's own code changes.
+#
+# First deploy: add a repo secret DEPLOY_SETUP_TOKEN (a fine-grained token for
+# this repo with Secrets + Variables: write). The run saves the new app's
+# identity as MSCOMPUTER_APP_SECRET / MSCOMPUTER_TOML, then deletes the token.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      replace_deployment:
+        description: Only if a failed run asks for it — the dep_… id of the live deployment to replace
+        required: false
+
+permissions:
+  contents: read
+  deployments: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  APP_NAME: watchtower
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check setup
+        env:
+          MSCOMPUTER_TOML: ${{ vars.MSCOMPUTER_TOML }}
+          SETUP_TOKEN: ${{ secrets.DEPLOY_SETUP_TOKEN }}
+        run: |
+          if [ -z "$MSCOMPUTER_TOML" ] && [ -z "$SETUP_TOKEN" ]; then
+            echo "::error title=Setup token missing::The first deploy needs the DEPLOY_SETUP_TOKEN secret to save the app's identity. Nothing was deployed."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Test and build
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm test
+          pnpm run build
+
+      - name: Sign the built files
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: 'dist/**'
+
+      - name: Stage the built site
+        run: |
+          set -euo pipefail
+          APP_DIR="$RUNNER_TEMP/site"
+          mkdir -p "$APP_DIR"
+          cp -r dist/. "$APP_DIR/"
+          cd "$APP_DIR"
+          git init -q && git add -A
+          git -c user.name="Watchtower" -c user.email="watchtower@users.noreply.github.com" commit -qm "Build ${GITHUB_SHA::7}"
+          echo "APP_DIR=$APP_DIR" >> "$GITHUB_ENV"
+
+      - name: Install the ms.computer CLI
+        run: |
+          curl -fsSL https://get.ms.computer/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Restore the app identity
+        env:
+          MSCOMPUTER_TOML: ${{ vars.MSCOMPUTER_TOML }}
+          APP_SECRET: ${{ secrets.MSCOMPUTER_APP_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "$MSCOMPUTER_TOML" ]; then
+            echo "First deploy — a new app will be created."
+            exit 0
+          fi
+          [ -n "$APP_SECRET" ] || { echo "::error::MSCOMPUTER_APP_SECRET is missing."; exit 1; }
+          printf '%s\n' "$MSCOMPUTER_TOML" > "$APP_DIR/mscomputer.toml"
+          KEY=$(sed -n 's/^key = "\(.*\)"/\1/p' "$APP_DIR/mscomputer.toml")
+          umask 077
+          mkdir -p "$HOME/.config/mscomputer/applications"
+          printf '%s' "$APP_SECRET" | base64 -d > "$HOME/.config/mscomputer/applications/$KEY.secret"
+
+      - name: Plan and build the image
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          mscomputer plan --write --json
+          mscomputer build --static
+
+      - name: Deploy
+        id: deploy
+        working-directory: ${{ env.APP_DIR }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPLACE_DEPLOYMENT: ${{ inputs.replace_deployment }}
+        run: |
+          set +e -uo pipefail
+          LOG="$RUNNER_TEMP/deploy.log"
+          deploy_app() {
+            local n=0 rc
+            while :; do
+              mscomputer deploy --name "$APP_NAME" > "$LOG" 2>&1; rc=$?
+              cat "$LOG"
+              if [ "$rc" -ne 0 ] && grep -q APPLICATION_DEPLOYMENT_ACTIVE "$LOG" && [ "$n" -lt 10 ]; then
+                n=$((n + 1)); echo "An earlier deploy is still settling — trying again in 30 s ($n/10)."; sleep 30; continue
+              fi
+              return "$rc"
+            done
+          }
+          deploy_app; RC=$?
+          if [ "$RC" -ne 0 ]; then
+            grep -q APPLICATION_ALREADY_LIVE "$LOG" || { echo "::error title=Deploy failed::see the log above"; exit 1; }
+            # a static site can't be swapped in place: take the recorded live version down, then deploy (the address stays)
+            DEP="$REPLACE_DEPLOYMENT"
+            [ -n "$DEP" ] || DEP=$(gh api "repos/$GITHUB_REPOSITORY/deployments?environment=ms-computer&per_page=20" \
+              --jq '[.[] | .payload.ms_computer_deployment? // empty] | first // empty' || true)
+            if ! [[ "$DEP" =~ ^dep_[0-9a-f]+$ ]]; then
+              echo "::error title=Don't know which live version to replace::Run this workflow by hand with replace_deployment = the dep_… id from the first deploy's log."
+              exit 1
+            fi
+            echo "Replacing live deployment $DEP"
+            mscomputer teardown "$DEP" || exit 1
+            deploy_app || { echo "::error title=Deploy failed after teardown::see the log above"; exit 1; }
+          fi
+          URL=$(grep -oE 'https://[a-z0-9-]+\.ms\.computer' "$LOG" | tail -1 || true)
+          DEP_ID=$(jq -r '.deployment.id // empty' .mscomputer/state/deploy.json 2>/dev/null || true)
+          [ -n "$DEP_ID" ] || DEP_ID=$(grep -oE 'dep_[0-9a-f]{8,}' "$LOG" | tail -1 || true)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "deployment_id=$DEP_ID" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Live on ms.computer::$URL (deployment $DEP_ID)"
+
+      - name: Record the deployment on GitHub
+        if: ${{ steps.deploy.outputs.deployment_id != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEP_ID: ${{ steps.deploy.outputs.deployment_id }}
+          URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4 5; do
+            ID=$(jq -n --arg sha "$GITHUB_SHA" --arg dep "$DEP_ID" \
+              '{ref: $sha, environment: "ms-computer", auto_merge: false, required_contexts: [], payload: {ms_computer_deployment: $dep}}' \
+              | gh api "repos/$GITHUB_REPOSITORY/deployments" --input - --jq .id) \
+            && gh api "repos/$GITHUB_REPOSITORY/deployments/$ID/statuses" -f state=success -f environment_url="$URL" > /dev/null \
+            && { echo "Recorded $DEP_ID"; exit 0; }
+            sleep $((i * i * 3))
+          done
+          echo "::error title=Couldn't record this deploy::Live as $DEP_ID. Next time, run the workflow by hand with replace_deployment = $DEP_ID."
+          exit 1
+
+      - name: Save the app identity and delete the setup token
+        if: ${{ !cancelled() && steps.deploy.outcome == 'success' }}
+        env:
+          GH_TOKEN: ${{ secrets.DEPLOY_SETUP_TOKEN }}
+          HAS_IDENTITY: ${{ vars.MSCOMPUTER_TOML != '' }}
+        run: |
+          set -euo pipefail
+          [ -n "$GH_TOKEN" ] || { echo "No setup token — nothing to do."; exit 0; }
+          if [ "$HAS_IDENTITY" != "true" ]; then
+            KEY=$(sed -n 's/^key = "\(.*\)"/\1/p' "$APP_DIR/mscomputer.toml")
+            base64 -w0 "$HOME/.config/mscomputer/applications/$KEY.secret" | gh secret set MSCOMPUTER_APP_SECRET --repo "$GITHUB_REPOSITORY"
+            gh variable set MSCOMPUTER_TOML --repo "$GITHUB_REPOSITORY" < "$APP_DIR/mscomputer.toml"
+            echo "Saved the app identity."
+          fi
+          gh secret delete DEPLOY_SETUP_TOKEN --repo "$GITHUB_REPOSITORY" \
+            && echo "::notice title=Setup token deleted::You can also revoke it on GitHub." \
+            || echo "::warning title=Setup token left behind::Delete DEPLOY_SETUP_TOKEN under Settings → Secrets and variables → Actions."

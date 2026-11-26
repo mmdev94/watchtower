@@ -3,8 +3,6 @@ import { PROBE_RUNS, REPO } from '../lib/data'
 import type { SiteSummary } from '../lib/model'
 import { href } from '../lib/route'
 
-export const SHIPYARD = 'https://shipyard-h0413.ms.computer'
-
 export function Mark({ className = 'h-8 w-8' }: { className?: string }) {
   return (
     <span className={`relative grid place-items-center rounded-lg bg-ink ${className}`}>
@@ -46,8 +44,8 @@ export function Footer() {
           <p className="font-semibold text-ink">Watchtower is open source and runs on ms.computer.</p>
           <p className="mt-1 max-w-[60ch]">
             A community tool, not an official ms.computer product. The checks run in{' '}
-            <a className="text-accent underline underline-offset-2" href={PROBE_RUNS} target="_blank" rel="noopener">public GitHub runs</a>; the
-            site is deployed with <a className="text-accent underline underline-offset-2" href={SHIPYARD} target="_blank" rel="noopener">Shipyard</a>.
+            <a className="text-accent underline underline-offset-2" href={PROBE_RUNS} target="_blank" rel="noopener">public GitHub runs</a>, and
+            the data they save is public too.
           </p>
         </div>
         <p className="font-mono text-[12px]">

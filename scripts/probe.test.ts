@@ -54,7 +54,7 @@ test('mergeSites: list first, tagged repos after, no duplicates, excludes honour
   ])
 })
 
-test('topicSites reads the Website field, else the latest Shipyard deploy', async () => {
+test('topicSites reads the Website field, else the latest ms-computer deployment', async () => {
   const get = async <T,>(path: string): Promise<T> => {
     if (path.startsWith('/search/')) {
       return {

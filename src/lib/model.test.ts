@@ -74,7 +74,7 @@ test('a site with no checks yet has no numbers, not zeros', () => {
 })
 
 test('names and addresses', () => {
-  assert.equal(slug('https://shipyard-h0413.ms.computer'), 'shipyard-h0413')
+  assert.equal(slug('https://chrono-n2732.ms.computer'), 'chrono-n2732')
   assert.equal(nameFromHost('letter-to-the-future-y2765.ms.computer'), 'Letter To The Future')
   assert.equal(msUrl('https://Foo-a1234.ms.computer/'), 'https://foo-a1234.ms.computer')
   assert.equal(msUrl('https://evil.com/?x=.ms.computer'), null)

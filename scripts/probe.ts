@@ -121,7 +121,7 @@ export interface Config {
 
 type Get = <T>(path: string) => Promise<T>
 
-/** Repos tagged ms-computer whose address we can find: the Website field, or the latest Shipyard deploy. */
+/** Repos tagged ms-computer whose address we can find: the Website field, or the repo's latest GitHub deployment to an `ms-computer` environment. */
 export async function topicSites(get: Get, lookups = 30): Promise<Site[]> {
   const q = encodeURIComponent(`topic:${TOPIC} archived:false`)
   const res = await get<{ items: { name: string; full_name: string; homepage: string | null; owner: { login: string } }[] }>(`/search/repositories?q=${q}&sort=updated&per_page=100`)

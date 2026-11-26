@@ -2,7 +2,7 @@
 
 **Is ms.computer up?** Watchtower checks ms.computer sites every 5 minutes from GitHub's servers, and shows uptime, response time and whether miners are serving each site. Every number has a receipt: the public run that measured it, and a signature on the data.
 
-Live at **(address after the first deploy)** · deployed with [Shipyard](https://shipyard-h0413.ms.computer)
+Live at **(address after the first deploy)**
 
 ## How it works
 
@@ -15,7 +15,7 @@ probe.yml → scripts/probe.ts   ──►   days/2026-11-26.jsonl  (1 line/run)
 
 - **A check** is one ordinary request for the home page. Up = any 2xx/3xx. A failure is retried once after 5 s; only two failures count as down.
 - **Recorded:** status, time to first byte (split into DNS, connect, TLS, server), ms.computer's `x-ms-edge-upstream` header (`replica` = a miner's copy answered, `origin` = ms.computer's own copy, usual right after a deploy), and the Cloudflare location from `cf-ray`.
-- **Sites:** [config/sites.json](config/sites.json), plus every GitHub repo tagged `ms-computer` with an ms.computer address in its Website field or in its Shipyard deploys (looked up hourly).
+- **Sites:** [config/sites.json](config/sites.json), plus every GitHub repo tagged `ms-computer` with an ms.computer address in its Website field or in its latest GitHub deployment to an `ms-computer` environment (looked up hourly).
 
 ## Checking the checker
 
