@@ -1,0 +1,39 @@
+{
+ "issues": {
+  "network": 1,
+  "watchtower-p1988": 2,
+  "the-1024-g4125": 3,
+  "nexus24-a9829": 4,
+  "deploy-doctor-d1556": 5,
+  "taodrop-x2274": 6,
+  "taoradar-c3561": 7,
+  "chrono-n2732": 8,
+  "calm-space-z5942": 9,
+  "sn24-explained-x6656": 10
+ },
+ "state": {
+  "watchtower-p1988": "up",
+  "the-1024-g4125": "up",
+  "nexus24-a9829": "up",
+  "deploy-doctor-d1556": "up",
+  "taodrop-x2274": "up",
+  "taoradar-c3561": "up",
+  "chrono-n2732": "up",
+  "calm-space-z5942": "down",
+  "sn24-explained-x6656": "up",
+  "full-rack-h1272": "up",
+  "slime-atlas-f8729": "up",
+  "one-line-b7794": "up",
+  "web-rewind-v0341": "up",
+  "imprint-r4756": "up",
+  "letter-to-the-future-y2765": "up",
+  "three-frames-z4449": "up",
+  "taonoise-m9728": "up",
+  "agentmart-e0613": "up",
+  "jmercury-j7764": "down",
+  "hull-landscape-i4367": "up",
+  "shipyard-h0413": "up",
+  "ms-test-c6339": "up",
+  "network": "up"
+ }
+}

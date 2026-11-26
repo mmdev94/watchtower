@@ -1,5 +1,11 @@
 [
  {
+  "url": "https://watchtower-p1988.ms.computer",
+  "name": "Watchtower",
+  "repo": "mmdev94/watchtower",
+  "source": "list"
+ },
+ {
   "url": "https://the-1024-g4125.ms.computer",
   "name": "The 1024",
   "repo": null,

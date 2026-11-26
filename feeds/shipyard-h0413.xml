@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>tag:watchtower,2026:shipyard-h0413</id>
+  <title>Watchtower: Shipyard</title>
+  <link rel="self" href="https://raw.githubusercontent.com/mmdev94/watchtower/data/feeds/shipyard-h0413.xml"/>
+  <link rel="alternate" href="https://watchtower-p1988.ms.computer/#/site/shipyard-h0413"/>
+  <updated>2026-11-26T17:31:46.407Z</updated>
+  <author><name>Watchtower</name></author>
+
+</feed>
