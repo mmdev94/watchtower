@@ -1,0 +1,16 @@
+name: Remove my site
+description: Stop Watchtower checking a site
+title: "[Remove] "
+labels: [remove-site]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: Address
+      placeholder: https://my-site-a1234.ms.computer
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Anything we should know? (optional)

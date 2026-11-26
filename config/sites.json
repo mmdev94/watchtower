@@ -1,0 +1,27 @@
+{
+  "about": "Sites Watchtower checks besides every repo tagged ms-computer on GitHub. To be removed, open an issue or add your address to exclude.",
+  "sites": [
+    { "url": "https://shipyard-h0413.ms.computer", "name": "Shipyard", "repo": "mmdev94/shipyard" },
+    { "url": "https://shipyard-test-r3602.ms.computer", "name": "Shipyard demo", "repo": "mmdev94/shipyard-test" },
+    { "url": "https://the-1024-g4125.ms.computer", "name": "The 1024" },
+    { "url": "https://nexus24-a9829.ms.computer", "name": "NEXUS24" },
+    { "url": "https://deploy-doctor-d1556.ms.computer", "name": "Deploy Doctor" },
+    { "url": "https://taodrop-x2274.ms.computer", "name": "TaoDrop" },
+    { "url": "https://taoradar-c3561.ms.computer", "name": "TaoRadar" },
+    { "url": "https://chrono-n2732.ms.computer", "name": "Chrono" },
+    { "url": "https://calm-space-z5942.ms.computer", "name": "Calm Space" },
+    { "url": "https://sn24-explained-x6656.ms.computer", "name": "ms.computer, explained" },
+    { "url": "https://full-rack-h1272.ms.computer", "name": "Full Rack" },
+    { "url": "https://slime-atlas-f8729.ms.computer", "name": "Slime Dispatch" },
+    { "url": "https://one-line-b7794.ms.computer", "name": "One Line" },
+    { "url": "https://web-rewind-v0341.ms.computer", "name": "Web Rewind" },
+    { "url": "https://imprint-r4756.ms.computer", "name": "Imprint" },
+    { "url": "https://letter-to-the-future-y2765.ms.computer", "name": "Letter to the Future" },
+    { "url": "https://three-frames-z4449.ms.computer", "name": "Three Frames" },
+    { "url": "https://taonoise-m9728.ms.computer", "name": "TaoNoise" },
+    { "url": "https://agentmart-e0613.ms.computer", "name": "AgentMart" },
+    { "url": "https://jmercury-j7764.ms.computer", "name": "J Mercury" },
+    { "url": "https://hull-landscape-i4367.ms.computer", "name": "Hull Custom Landscape" }
+  ],
+  "exclude": []
+}

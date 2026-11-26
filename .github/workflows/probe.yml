@@ -1,0 +1,72 @@
+# Watchtower's probe. Every 5 minutes (when GitHub's scheduler gets to it) it
+# checks each listed ms.computer site once, and commits what it saw to the
+# `data` branch. Each run's results are signed (Sigstore, via GitHub
+# attestations), so anyone can confirm a file came from this workflow and was
+# not edited afterwards:
+#
+#   gh attestation verify latest.json -R mmdev94/watchtower
+#
+# The log of every run lists every check, as measured.
+name: Probe
+run-name: Check every site
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Open the data branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin data >/dev/null; then
+            git fetch --depth=1 origin data
+            git worktree add --detach out FETCH_HEAD
+          else
+            git worktree add --orphan -b data out
+          fi
+
+      - name: Check every site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node --experimental-strip-types scripts/probe.ts --out out
+
+      - name: Sign this run's results
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            out/latest.json
+            out/summary.json
+
+      - name: Save to the data branch
+        working-directory: out
+        run: |
+          git add -A
+          git commit -q -m "Checks at $(jq -r .at latest.json)" -m "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          for i in 1 2 3; do
+            git push -q origin HEAD:refs/heads/data && exit 0
+            echo "Push refused (attempt $i); taking the newer data branch and trying again."
+            git fetch --depth=1 origin data
+            git rebase -q FETCH_HEAD || { git rebase --abort; exit 1; }
+          done
+          exit 1
