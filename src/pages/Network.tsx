@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { GetAlerts } from '../components/alerts'
 import { HourBars, LineChart } from '../components/charts'
 import { BrowserTest, VerifyData } from '../components/proof'
 import { Receipt, ServedBy, Stat, StatusPill, statusOf, type Status } from '../components/ui'
@@ -20,8 +21,21 @@ function Hero({ data }: { data: Loaded }) {
   const up24 = summary.sites.filter((s) => s.up24 != null)
   const avgUp = up24.length ? up24.reduce((a, s) => a + s.up24!, 0) / up24.length : null
 
+  const outage = summary.network.outage
+  const take = summary.network
   return (
     <section className="border-b border-line bg-white">
+      {outage && (
+        <div className="bg-bad text-white">
+          <div className="mx-auto max-w-shell px-5 py-4 md:px-8">
+            <p className="font-display text-xl font-semibold">ms.computer is having problems right now.</p>
+            <p className="mt-1 text-[15px] text-white/90">
+              {outage.peak} of {outage.of} sites failed in the same check, since {when(outage.start)} ({duration(outage.start, null)}). When this many go down together it’s
+              the network, not the sites — if yours is one of them, it’s probably not your fault.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="mx-auto max-w-shell px-5 pb-12 pt-14 md:px-8 md:pt-20">
         <span className="eyebrow">Live · checked every 5 minutes</span>
         <h1 className="font-display mt-4 max-w-[18ch] text-[clamp(2.4rem,6vw,4.4rem)] font-semibold leading-[1.0] tracking-[-0.04em]">
@@ -50,11 +64,22 @@ function Hero({ data }: { data: Loaded }) {
             <a href={PROBE_RUNS} target="_blank" rel="noopener" className="text-accent underline underline-offset-2">See the runs ↗</a>
           </p>
         )}
-        <div className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="mt-10 grid grid-cols-2 gap-3 lg:grid-cols-5">
           <Stat label="Up right now" value={`${up} / ${summary.sites.length}`} tone={down ? 'bad' : undefined} note={down ? `${down} answering with errors` : 'every site answered'} />
           <Stat label="Average uptime, 24 h" value={pct(avgUp)} note="share of checks that got a good answer" />
           <Stat label="Typical response" value={secs(ttfb)} note="time to first byte, median of the sites, 24 h" />
           <Stat label="Served by miners" value={good.length ? `${miners} / ${good.length}` : '—'} note="up sites whose last answer came from a miner’s copy" />
+          <div className="col-span-2 lg:col-span-1">
+            <Stat
+              label="Miners take over in"
+              value={take.takeoverMedian != null ? `~${take.takeoverMedian} min` : '—'}
+              note={
+                take.takeoverCount
+                  ? `after a deploy: median of ${take.takeoverCount} ${take.takeoverCount === 1 ? 'deploy' : 'deploys'} seen in 7 days (±5 min)`
+                  : 'after a deploy — no deploy caught switching yet'
+              }
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -154,6 +179,7 @@ function Trend({ data }: { data: Loaded }) {
 }
 
 function Incidents({ data }: { data: Loaded }) {
+  const outs = data.summary.network.outages.slice(0, 5)
   const all = data.summary.sites
     .flatMap((s) => s.incidents.map((i) => ({ ...i, site: s })))
     .sort((a, b) => b.start.localeCompare(a.start))
@@ -162,6 +188,21 @@ function Incidents({ data }: { data: Loaded }) {
     <section className="mx-auto max-w-shell px-5 pt-16 md:px-8">
       <span className="eyebrow">Incidents</span>
       <h2 className="font-display mt-3 text-[clamp(1.7rem,3.4vw,2.4rem)] font-semibold tracking-[-0.03em]">Recent downtime</h2>
+      {outs.length > 0 && (
+        <ul className="mt-6 divide-y divide-[#f1c2bd] border border-[#f1c2bd] bg-[#fff6f5]">
+          {outs.map((o) => (
+            <li key={o.start} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-5 py-3.5">
+              <span>
+                <strong className="text-badText">Network-wide</strong>{' '}
+                <span className="text-[14px] text-ink2">— {o.peak} of {o.of} sites down at once</span>
+              </span>
+              <span className="tabular text-[13px] text-muted">
+                {when(o.start)} · {o.end ? `for ${duration(o.start, o.end)}` : <strong className="text-badText">still going · {duration(o.start, null)}</strong>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
       {all.length === 0 ? (
         <p className="mt-4 text-muted">No downtime in the last 7 days.</p>
       ) : (
@@ -171,6 +212,7 @@ function Incidents({ data }: { data: Loaded }) {
               <span>
                 <a href={href.site(slug(i.site.url))} className="font-semibold hover:text-accent">{i.site.name}</a>{' '}
                 <span className="text-[14px] text-ink2">— {i.reason}</span>
+                {i.network && <span className="ml-2 rounded-full bg-[#fde3e1] px-2 py-0.5 text-[11px] font-semibold text-badText">during an outage</span>}
               </span>
               <span className="tabular text-[13px] text-muted">
                 {when(i.start)} · {i.end ? `down for ${duration(i.start, i.end)}` : <strong className="text-badText">still down · {duration(i.start, null)}</strong>}
@@ -229,6 +271,20 @@ export function Network() {
       <Sites data={data} />
       <Trend data={data} />
       <Incidents data={data} />
+      <section className="mx-auto max-w-shell px-5 pt-16 md:px-8">
+        <span className="eyebrow">Alerts</span>
+        <h2 className="font-display mt-3 text-[clamp(1.7rem,3.4vw,2.4rem)] font-semibold tracking-[-0.03em]">Hear about it when it happens</h2>
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <GetAlerts slug={null} name="ms.computer" />
+          <div className="border border-line bg-white p-5">
+            <h3 className="font-display text-lg font-semibold">For one site</h3>
+            <p className="mt-1 text-[14px] leading-relaxed text-muted">
+              Every site has its own alerts — open it from the list above and use <em>Get alerts</em> there. Owners: it’s the easiest way to learn your site is down
+              before your visitors tell you.
+            </p>
+          </div>
+        </div>
+      </section>
       <Proof data={data} />
       <Cta />
     </>

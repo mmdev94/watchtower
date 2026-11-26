@@ -1,3 +1,4 @@
+import { GetAlerts } from '../components/alerts'
 import { HourBars, LineChart, Phases } from '../components/charts'
 import { BrowserTest, CodeLine } from '../components/proof'
 import { Receipt, ServedBy, Stat, StatusPill, statusOf } from '../components/ui'
@@ -93,7 +94,10 @@ export function SitePage({ slug }: { slug: string }) {
           <ul className="mt-4 divide-y divide-line border border-line bg-white">
             {s.incidents.map((i) => (
               <li key={i.start} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-5 py-3.5">
-                <span className="text-[15px]">{i.reason}</span>
+                <span className="text-[15px]">
+                  {i.reason}
+                  {i.network && <span className="ml-2 rounded-full bg-[#fde3e1] px-2 py-0.5 text-[11px] font-semibold text-badText">during an ms.computer outage</span>}
+                </span>
                 <span className="tabular text-[13px] text-muted">
                   {when(i.start)} → {i.end ? when(i.end) : <strong className="text-badText">still down</strong>} · {duration(i.start, i.end)} · {i.checks} failed {i.checks === 1 ? 'check' : 'checks'}
                 </span>
@@ -103,7 +107,41 @@ export function SitePage({ slug }: { slug: string }) {
         )}
       </section>
 
-      <section className="mx-auto grid max-w-shell gap-4 px-5 pt-12 md:px-8 lg:grid-cols-2">
+      <section className="mx-auto max-w-shell px-5 pt-12 md:px-8">
+        <h2 className="font-display text-2xl font-semibold tracking-[-0.02em]">Deploys and miners</h2>
+        <p className="mt-1 max-w-[70ch] text-muted">
+          Right after a deploy, ms.computer’s own copy answers (“origin”); then miners take over (“replica”). Each switch Watchtower saw in 7 days:
+        </p>
+        {s.takeovers.length === 0 ? (
+          <p className="mt-3 text-muted">None seen — either no deploy, or miners took over within one check (under 5 minutes).</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-line border border-line bg-white">
+            {s.takeovers.map((t) => (
+              <li key={t.start} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-5 py-3.5">
+                <span className="text-[15px]">
+                  {t.end ? (
+                    <>
+                      Miners took over after <strong>{t.minutes} min</strong>
+                    </>
+                  ) : (
+                    <strong className="text-ink">Still on ms.computer’s origin — waiting for miners</strong>
+                  )}
+                </span>
+                <span className="tabular text-[13px] text-muted">
+                  first origin answer {when(t.start)}
+                  {t.end ? ` → first miner answer ${when(t.end)}` : ` · ${duration(t.start, null)} so far`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mx-auto max-w-shell px-5 pt-12 md:px-8">
+        <GetAlerts slug={slug} name={s.name} />
+      </section>
+
+      <section className="mx-auto grid max-w-shell gap-4 px-5 pt-4 md:px-8 lg:grid-cols-2">
         <BrowserTest urls={[{ url: s.url, name: s.name }]} title="Test it from your browser" />
         <div className="border border-line bg-white p-5">
           <h3 className="font-display text-lg font-semibold">Uptime badge for your README</h3>

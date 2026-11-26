@@ -91,3 +91,63 @@ test('badge text and colours', () => {
   assert.match(badgeSvg(1, false), /#d0453a/)
   assert.doesNotMatch(badgeSvg(1, true, '<x>'), /<x>/)
 })
+
+test('outages: half the sites (and at least 3) down in one run', async () => {
+  const { outages } = await import('./model.ts')
+  const s = (n: number) => `https://s${n}-a1111.ms.computer`
+  const r = (at: string, down: number, total = 6) => run(at, Array.from({ length: total }, (_, i) => (i < down ? bad(s(i)) : ok(s(i)))))
+  assert.deepEqual(outages([r('t1', 2), r('t2', 3), r('t3', 5), r('t4', 1), r('t5', 2, 3)]), [{ start: 't2', end: 't4', runs: 2, peak: 5, of: 6 }])
+})
+
+test('takeovers: origin answers until the first miner answer; failures in between don’t end it', async () => {
+  const { takeovers } = await import('./model.ts')
+  const at = (m: number) => new Date(Date.UTC(2026, 10, 26, 12, m)).toISOString()
+  const list = [
+    { at: at(0), c: ok(A) },
+    { at: at(5), c: bad(A) },
+    { at: at(10), c: ok(A, 400, 'origin') },
+    { at: at(15), c: bad(A) },
+    { at: at(20), c: ok(A, 400, 'origin') },
+    { at: at(25), c: ok(A) },
+    { at: at(30), c: ok(A, 400, 'origin') },
+  ]
+  assert.deepEqual(takeovers(list), [
+    { start: at(10), end: at(25), minutes: 15 },
+    { start: at(30), end: null, minutes: null },
+  ])
+})
+
+test('summarize: runs where the probe itself was offline are left out; outages flag site incidents', () => {
+  const now = new Date('2026-11-26T12:30:00Z')
+  const C = 'https://c-z3333.ms.computer'
+  const three: Site[] = [...sites, { url: C, name: 'C', repo: null, source: 'list' }]
+  const offline = { ...run('2026-11-26T12:10:00Z', [bad(A), bad(B), bad(C)]), control: { ok: false, ms: null, error: 'x' } }
+  const s = summarize(
+    [run('2026-11-26T12:00:00Z', [ok(A), ok(B), ok(C)]), run('2026-11-26T12:05:00Z', [bad(A), bad(B), bad(C)]), offline, run('2026-11-26T12:15:00Z', [ok(A, 300, 'origin'), ok(B), ok(C)]), run('2026-11-26T12:20:00Z', [ok(A), ok(B), ok(C)])],
+    three,
+    now,
+  )
+  assert.equal(s.skipped, 1)
+  assert.equal(s.sites[0].checks24, 4)
+  assert.equal(s.network.outages.length, 1)
+  assert.equal(s.network.outages[0].end, '2026-11-26T12:15:00Z')
+  assert.equal(s.network.outage, null)
+  assert.equal(s.sites[0].incidents[0].network, true)
+  assert.deepEqual(s.sites[0].takeovers, [{ start: '2026-11-26T12:15:00Z', end: '2026-11-26T12:20:00Z', minutes: 5 }])
+  assert.equal(s.network.takeoverMedian, 5)
+})
+
+test('feeds: one entry per event, stable ids, escaped', async () => {
+  const { atom, networkEntries, siteEntries } = await import('./feed.ts')
+  const now = new Date('2026-11-26T12:30:00Z')
+  const s = summarize([run('2026-11-26T12:00:00Z', [ok(A, 300, 'origin'), bad(B)]), run('2026-11-26T12:05:00Z', [ok(A), ok(B)])], sites, now)
+  const page = (x: string | null) => `https://w.test/#/${x ?? ''}`
+  const b = siteEntries(s, 'b-y2222', page)
+  assert.deepEqual(b.map((e) => e.id), ['b-y2222:down:2026-11-26T12:00:00Z', 'b-y2222:up:2026-11-26T12:00:00Z'])
+  assert.match(b[1].title, /back up after 5 min/)
+  assert.match(siteEntries(s, 'a-x1111', page)[0].title, /miners took over 5 min/)
+  assert.equal(networkEntries(s, page).length, 2)
+  const xml = atom({ id: 'x', title: 'A & <B>', self: 's', link: 'l', updated: s.generated, entries: b })
+  assert.match(xml, /A &amp; &lt;B&gt;/)
+  assert.equal((xml.match(/<entry>/g) ?? []).length, 2)
+})

@@ -48,6 +48,27 @@ export function How() {
           <p>The run’s log prints every check as a line of text, so the raw measurement is readable without any tools.</p>
         </Block>
 
+        <Block title="Outages, deploys and alerts">
+          <ul className="list-disc space-y-2 pl-6">
+            <li>
+              <strong>Network-wide outage</strong>: half or more of the sites (and at least 3) fail in the same check. Then it’s ms.computer, not the sites, and the
+              page says so.
+            </li>
+            <li>
+              <strong>Miners take over in</strong>: after a deploy, answers come from ms.computer’s origin until miners serve the site. Watchtower times each switch from
+              the first origin answer to the first miner answer. Checks are 5 minutes apart, so each time is ±5 minutes, and switches faster than one check aren’t seen.
+            </li>
+            <li>
+              <strong>Alerts</strong>: every site has an alert issue on GitHub. When a site has failed two checks in a row (about 10 minutes), the probe comments on it, and
+              again when it’s back — GitHub emails everyone subscribed. The same events are in an Atom feed per site, and one for the network.
+            </li>
+            <li>
+              <strong>Control check</strong>: each run also fetches a page that isn’t on ms.computer (github.com). If that fails too, the probe’s own connection was the
+              problem; the run is kept in the raw data but left out of every number.
+            </li>
+          </ul>
+        </Block>
+
         <Block title="Why you can trust the numbers">
           <ol className="list-decimal space-y-3 pl-6">
             <li><strong>The checks run in public.</strong> <A to={PROBE_RUNS}>Every run</A> is on GitHub, with its log. Each page links to the run behind its numbers.</li>

@@ -96,3 +96,29 @@ export const hourLabel = (iso: string) => {
   const t = (x: Date) => x.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
   return `${d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}, ${t(d)}–${t(end)}`
 }
+
+// ── alerts: which GitHub issue to subscribe to for each site ─────────────────
+
+export interface AlertsFile {
+  issues: Record<string, number>
+}
+let alertsP: Promise<AlertsFile | null> | null = null
+export const loadAlerts = () =>
+  (alertsP ??= fetch(`${DATA}/alerts.json`, { cache: 'no-cache' })
+    .then((r) => (r.ok ? (r.json() as Promise<AlertsFile>) : null))
+    .catch(() => null))
+
+export function useAlerts(): AlertsFile | null {
+  const [a, setA] = useState<AlertsFile | null>(null)
+  useEffect(() => {
+    let alive = true
+    loadAlerts().then((x) => alive && setA(x))
+    return () => {
+      alive = false
+    }
+  }, [])
+  return a
+}
+
+export const issueUrl = (n: number) => `https://github.com/${REPO}/issues/${n}`
+export const feedUrl = (slug: string | null) => `${DATA}/feeds/${slug ?? 'all'}.xml`

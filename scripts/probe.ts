@@ -11,6 +11,7 @@ import https from 'node:https'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { badgeSvg } from '../src/lib/badge.ts'
+import { atom, networkEntries, siteEntries } from '../src/lib/feed.ts'
 import { msUrl, nameFromHost, slug, summarize, type Check, type Run, type Site } from '../src/lib/model.ts'
 
 export const UA = 'Watchtower/1.0 (+https://github.com/mmdev94/watchtower; uptime checks for ms.computer sites, every 5 min)'
@@ -115,9 +116,14 @@ export async function checkAll(sites: Site[], c: (u: string) => Promise<Check> =
 // ── which sites ──────────────────────────────────────────────────────────────
 
 export interface Config {
+  /** Watchtower's own address, for links in feeds and alerts (empty until it's deployed) */
+  site?: string
   sites: { url: string; name?: string; repo?: string }[]
   exclude: string[]
 }
+
+/** Not an ms.computer site: if even this fails, the probe's own connection is the problem. */
+export const CONTROL = 'https://github.com/robots.txt'
 
 type Get = <T>(path: string) => Promise<T>
 
@@ -207,9 +213,10 @@ export async function readRuns(dir: string): Promise<Run[]> {
   return runs
 }
 
-export async function write(dir: string, run: Run, sites: Site[], now: Date): Promise<void> {
+export async function write(dir: string, run: Run, sites: Site[], now: Date, links: { data: string; site?: string } = { data: '' }): Promise<void> {
   await mkdir(join(dir, 'days'), { recursive: true })
   await mkdir(join(dir, 'badges'), { recursive: true })
+  await mkdir(join(dir, 'feeds'), { recursive: true })
   const day = run.at.slice(0, 10)
   const dayFile = join(dir, 'days', `${day}.jsonl`)
   const prev = (await readFile(dayFile, 'utf8').catch(() => '')) as string
@@ -219,6 +226,20 @@ export async function write(dir: string, run: Run, sites: Site[], now: Date): Pr
   const summary = summarize(await readRuns(dir), sites, now, run.run)
   await writeFile(join(dir, 'summary.json'), `${JSON.stringify(summary)}\n`)
   for (const s of summary.sites) await writeFile(join(dir, 'badges', `${slug(s.url)}.svg`), badgeSvg(s.up24, s.last ? s.last.up : null))
+
+  const page = (s: string | null) => (links.site ? `${links.site}/#/${s ? `site/${s}` : ''}` : links.data)
+  const updated = summary.generated
+  await writeFile(
+    join(dir, 'feeds', 'all.xml'),
+    atom({ id: 'tag:watchtower,2026:all', title: 'Watchtower: ms.computer outages and downtime', self: `${links.data}/feeds/all.xml`, link: page(null), updated, entries: networkEntries(summary, page) }),
+  )
+  for (const s of summary.sites) {
+    const id = slug(s.url)
+    await writeFile(
+      join(dir, 'feeds', `${id}.xml`),
+      atom({ id: `tag:watchtower,2026:${id}`, title: `Watchtower: ${s.name}`, self: `${links.data}/feeds/${id}.xml`, link: page(id), updated, entries: siteEntries(summary, id, page) }),
+    )
+  }
 }
 
 // ── run ──────────────────────────────────────────────────────────────────────
@@ -268,11 +289,16 @@ async function main() {
       ? { id: env.GITHUB_RUN_ID, attempt: Number(env.GITHUB_RUN_ATTEMPT ?? 1), url: `${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}` }
       : null,
     sha: env.GITHUB_SHA ?? null,
+    control: undefined,
     checks: await checkAll(sites),
   }
+  const control = await check(CONTROL)
+  run.control = { ok: control.up, ms: control.ttfb, error: control.up ? null : (control.error ?? `HTTP ${control.status}`) }
   console.log(`Checked ${sites.length} sites at ${run.at}\n`)
+  if (!control.up) console.log(`!! The control check (${CONTROL}) failed too: ${run.control.error}. This run says nothing about the sites and is left out of every number.\n`)
   for (const c of run.checks) console.log(logLine(c))
-  await write(dir, run, sites, now)
+  const data = env.GITHUB_REPOSITORY ? `https://raw.githubusercontent.com/${env.GITHUB_REPOSITORY}/data` : dir
+  await write(dir, run, sites, now, { data, site: config.site?.replace(/\/$/, '') || undefined })
   const down = run.checks.filter((c) => !c.up).length
   console.log(`\n${run.checks.length - down} up, ${down} down. Written to ${dir}/`)
 }

@@ -1,5 +1,6 @@
 {
-  "about": "Sites Watchtower checks besides every repo tagged ms-computer on GitHub. To be removed, open an issue or add your address to exclude.",
+  "about": "Sites Watchtower checks besides every repo tagged ms-computer on GitHub. To be removed, open an issue or add your address to exclude. `site` is Watchtower's own address, used for links in alerts.",
+  "site": "",
   "sites": [
     { "url": "https://the-1024-g4125.ms.computer", "name": "The 1024" },
     { "url": "https://nexus24-a9829.ms.computer", "name": "NEXUS24" },

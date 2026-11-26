@@ -40,8 +40,13 @@ export interface Run {
   run: { id: string; attempt: number; url: string } | null
   /** the commit of the probe code that ran */
   sha: string | null
+  /** a check of a site that isn't on ms.computer, to tell "the probe's own internet is down" from "the sites are down" */
+  control?: { ok: boolean; ms: number | null; error: string | null }
   checks: Check[]
 }
+
+/** A run whose own connection failed says nothing about the sites; it's left out, not counted as down. */
+export const validRun = (r: Run) => r.control?.ok !== false
 
 export interface Site {
   url: string
@@ -58,7 +63,33 @@ export interface Incident {
   checks: number
   /** what the failing checks said, e.g. "503" or "No answer within 15 s" */
   reason: string
+  /** happened during a network-wide outage */
+  network?: boolean
 }
+
+/** Many sites down in the same check: a problem with ms.computer, not with one site. */
+export interface Outage {
+  start: string
+  end: string | null
+  runs: number
+  /** most sites down at once, out of how many checked */
+  peak: number
+  of: number
+}
+
+/** A deploy seen from outside: ms.computer's own copy answered first, then miners took over. */
+export interface Takeover {
+  /** first answer from ms.computer's origin */
+  start: string
+  /** first answer from a miner's copy after that; null: still on origin */
+  end: string | null
+  /** minutes between the two (checks are 5 min apart, so ±5 min) */
+  minutes: number | null
+}
+
+/** An outage is at least this share of the checked sites down in one run, and at least OUTAGE_MIN sites. */
+export const OUTAGE_SHARE = 0.5
+export const OUTAGE_MIN = 3
 
 /** One hour of one site: [checks, up, median ttfb (ms) or null, answered by a replica] */
 export type Hour = [number, number, number | null, number] | null
@@ -76,6 +107,7 @@ export interface SiteSummary extends Site {
   /** share of good answers in 24 h that came from a replica */
   replica24: number | null
   incidents: Incident[]
+  takeovers: Takeover[]
 }
 
 export interface Summary {
@@ -89,6 +121,16 @@ export interface Summary {
   runsPerHour: number[]
   /** where the checks came from: Cloudflare locations and how often */
   from: Record<string, number>
+  /** runs left out because the probe's own connection failed */
+  skipped: number
+  network: {
+    outages: Outage[]
+    /** the outage going on in the latest run, if any */
+    outage: Outage | null
+    /** median minutes from a deploy's first origin answer to the first miner answer, 7 days */
+    takeoverMedian: number | null
+    takeoverCount: number
+  }
   sites: SiteSummary[]
 }
 
@@ -139,12 +181,59 @@ export function incidents(checks: { at: string; c: Check }[]): Incident[] {
   return out
 }
 
+/** Runs where at least OUTAGE_SHARE of the sites (and OUTAGE_MIN) were down, grouped into stretches. */
+export function outages(runs: Run[]): Outage[] {
+  const out: Outage[] = []
+  let open: Outage | null = null
+  for (const r of runs) {
+    const down = r.checks.filter((c) => !c.up).length
+    const bad = r.checks.length > 0 && down >= OUTAGE_MIN && down / r.checks.length >= OUTAGE_SHARE
+    if (bad) {
+      if (!open) {
+        open = { start: r.at, end: null, runs: 0, peak: 0, of: r.checks.length }
+        out.push(open)
+      }
+      open.runs++
+      if (down > open.peak) {
+        open.peak = down
+        open.of = r.checks.length
+      }
+    } else if (open) {
+      open.end = r.at
+      open = null
+    }
+  }
+  return out
+}
+
+/** Each stretch of origin answers, ended by the first miner answer. Failed checks don't end it. */
+export function takeovers(checks: { at: string; c: Check }[]): Takeover[] {
+  const out: Takeover[] = []
+  let open: Takeover | null = null
+  for (const { at, c } of checks) {
+    if (!c.up) continue
+    if (c.upstream === 'origin' && !open) {
+      open = { start: at, end: null, minutes: null }
+      out.push(open)
+    } else if (c.upstream === 'replica' && open) {
+      open.end = at
+      open.minutes = Math.round((Date.parse(at) - Date.parse(open.start)) / 60_000)
+      open = null
+    }
+  }
+  return out
+}
+
+const within = (at: string, o: Outage) => at >= o.start && (o.end == null || at < o.end)
+
 /** Turns runs (any order, any days) into the summary the pages show. */
 export function summarize(runs: Run[], sites: Site[], now: Date, run: Run['run'] = null): Summary {
   const end = hourStart(now.getTime()) + HOUR
   const start = end - WINDOW_HOURS * HOUR
   const day = now.getTime() - 24 * HOUR
-  const sorted = runs.filter((r) => Date.parse(r.at) >= start && Date.parse(r.at) < end).sort((a, b) => a.at.localeCompare(b.at))
+  const inWindow = runs.filter((r) => Date.parse(r.at) >= start && Date.parse(r.at) < end)
+  const sorted = inWindow.filter(validRun).sort((a, b) => a.at.localeCompare(b.at))
+  const outs = outages(sorted)
 
   const hours = Array.from({ length: WINDOW_HOURS }, (_, i) => new Date(start + i * HOUR).toISOString())
   const runsPerHour = hours.map(() => 0)
@@ -182,10 +271,30 @@ export function summarize(runs: Run[], sites: Site[], now: Date, run: Run['run']
       ttfb90: percentile(ttfbs, 90),
       wait50: percentile(waits, 50),
       replica24: good24.length ? good24.filter((x) => x.c.upstream === 'replica').length / good24.length : null,
-      incidents: incidents(list).reverse(),
+      incidents: incidents(list)
+        .map((i) => (outs.some((o) => within(i.start, o)) ? { ...i, network: true } : i))
+        .reverse(),
+      takeovers: takeovers(list).reverse(),
     }
   })
-  return { v: 1, generated: now.toISOString(), run, hours, runsPerHour, from, sites: summaries }
+  const done = summaries.flatMap((s) => s.takeovers.filter((t) => t.minutes != null).map((t) => t.minutes!))
+  const lastOut = outs.at(-1)
+  return {
+    v: 1,
+    generated: now.toISOString(),
+    run,
+    hours,
+    runsPerHour,
+    from,
+    skipped: inWindow.length - sorted.length,
+    network: {
+      outages: [...outs].reverse(),
+      outage: lastOut && lastOut.end == null ? lastOut : null,
+      takeoverMedian: percentile(done, 50),
+      takeoverCount: done.length,
+    },
+    sites: summaries,
+  }
 }
 
 /** "chrono-n2732" from "https://chrono-n2732.ms.computer" — the id used in page addresses and file names. */
