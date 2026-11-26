@@ -2,7 +2,7 @@
 
 **Is ms.computer up?** Watchtower checks ms.computer sites every 5 minutes from GitHub's servers, and shows uptime, response time and whether miners are serving each site. Every number has a receipt: the public run that measured it, and a signature on the data.
 
-Live at **(address after the first deploy)**
+Live at **https://watchtower-p1988.ms.computer**
 
 ## How it works
 
