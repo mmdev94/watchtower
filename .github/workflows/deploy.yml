@@ -11,6 +11,12 @@ name: Deploy
 on:
   push:
     branches: [main]
+    # the probe's own files don't change the site
+    paths-ignore:
+      - config/**
+      - scripts/**
+      - .github/workflows/probe.yml
+      - README.md
   workflow_dispatch:
     inputs:
       replace_deployment:
