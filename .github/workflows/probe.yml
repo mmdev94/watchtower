@@ -97,33 +97,32 @@ jobs:
           done
           exit 1
 
-  # GitHub's scheduler is "best effort" and sometimes ignores a new repo's
-  # schedule for hours. Until scheduled runs show up, each run starts the next
-  # one 5 minutes after it began. Once the schedule works, this does nothing.
+  # GitHub's scheduler is "best effort": it skips runs, sometimes for hours.
+  # So every run — whatever started it — makes sure the next one exists: five
+  # minutes after it began, if no newer run has started or is waiting, it
+  # starts one. The schedule above stays as a backup that restarts the chain
+  # if a run ever fails to.
   keep-going:
     needs: probe
-    if: ${{ !cancelled() && github.event_name != 'schedule' }}
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - name: Start the next check in 5 minutes, unless the schedule is running
+      - name: Start the next check in 5 minutes, unless one is already coming
         env:
           GH_TOKEN: ${{ github.token }}
           STARTED: ${{ needs.probe.outputs.started }}
         run: |
           set -euo pipefail
-          runs() { gh api "repos/$GITHUB_REPOSITORY/actions/workflows/probe.yml/runs?$1" --jq "$2"; }
-          LAST=$(runs 'event=schedule&per_page=1' '.workflow_runs[0].created_at // empty')
-          if [ -n "$LAST" ] && [ $(( $(date +%s) - $(date -d "$LAST" +%s) )) -lt 1200 ]; then
-            echo "GitHub's schedule is running (last scheduled run $LAST). Nothing to do."
-            exit 0
-          fi
-          WAIT=$(( ${STARTED:-$(date +%s)} + 300 - $(date +%s) ))
+          START=${STARTED:-$(date +%s)}
+          WAIT=$(( START + 300 - $(date +%s) ))
           [ "$WAIT" -le 0 ] || sleep "$WAIT"
-          WAITING=$(runs 'status=queued&per_page=5' '.total_count')
-          if [ "$WAITING" -gt 0 ]; then
-            echo "A check is already waiting to run. Nothing to do."
+          # runs of this workflow created after this one started, or still waiting to start
+          NEWER=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/probe.yml/runs?per_page=10" \
+            --jq "[.workflow_runs[] | select(.id != $GITHUB_RUN_ID) | select(((.created_at | fromdateiso8601) > $START) or .status == \"queued\" or .status == \"waiting\" or .status == \"pending\")] | length")
+          if [ "$NEWER" -gt 0 ]; then
+            echo "The next check is already on its way ($NEWER newer run). Nothing to do."
             exit 0
           fi
           gh workflow run probe.yml --ref main --repo "$GITHUB_REPOSITORY"
-          echo "Started the next check (GitHub's schedule hasn't run in the last 20 minutes)."
+          echo "Started the next check."
