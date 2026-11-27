@@ -21,6 +21,7 @@ on:
       - config/**
       - scripts/probe.ts
       - scripts/alerts.ts
+      - scripts/deploys.ts
       - src/lib/feed.ts
       - src/lib/model.ts
       - src/lib/badge.ts
@@ -77,12 +78,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: node --experimental-strip-types scripts/alerts.ts --out out
 
+      - name: Measure push → live for Shipyard deploys (hourly)
+        # a problem here must never stop the uptime data being saved
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node --experimental-strip-types scripts/deploys.ts --out out
+
       - name: Sign this run's results
         uses: actions/attest-build-provenance@v4
         with:
-          subject-path: |
-            out/latest.json
-            out/summary.json
+          # every data file: latest.json, summary.json, deploys.json…
+          subject-path: out/*.json
 
       - name: Save to the data branch
         working-directory: out
