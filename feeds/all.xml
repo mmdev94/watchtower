@@ -4,8 +4,15 @@
   <title>Watchtower: ms.computer outages and downtime</title>
   <link rel="self" href="https://raw.githubusercontent.com/mmdev94/watchtower/data/feeds/all.xml"/>
   <link rel="alternate" href="https://watchtower-p1988.ms.computer/#/"/>
-  <updated>2026-11-27T16:42:49.935Z</updated>
+  <updated>2026-11-27T16:52:59.384Z</updated>
   <author><name>Watchtower</name></author>
+  <entry>
+    <id>tag:watchtower,2026:jmercury-j7764:down:2026-11-27T16:52:59.384Z</id>
+    <title>J Mercury is down: HTTP 503 (service unavailable)</title>
+    <updated>2026-11-27T16:52:59.384Z</updated>
+    <link href="https://watchtower-p1988.ms.computer/#/site/jmercury-j7764"/>
+    <summary>Watchtower’s check got HTTP 503 (service unavailable), twice, 5 seconds apart.</summary>
+  </entry>
   <entry>
     <id>tag:watchtower,2026:jmercury-j7764:up:2026-11-27T16:27:15.923Z</id>
     <title>J Mercury is back up after 16 min</title>
