@@ -4,8 +4,15 @@
   <title>Watchtower: Calm Space</title>
   <link rel="self" href="https://raw.githubusercontent.com/mmdev94/watchtower/data/feeds/calm-space-z5942.xml"/>
   <link rel="alternate" href="https://watchtower-p1988.ms.computer/#/site/calm-space-z5942"/>
-  <updated>2026-11-26T17:02:02.549Z</updated>
+  <updated>2026-11-27T16:27:15.923Z</updated>
   <author><name>Watchtower</name></author>
+  <entry>
+    <id>tag:watchtower,2026:calm-space-z5942:up:2026-11-26T17:02:02.549Z</id>
+    <title>Calm Space is back up after 23 h 25 min</title>
+    <updated>2026-11-27T16:27:15.923Z</updated>
+    <link href="https://watchtower-p1988.ms.computer/#/site/calm-space-z5942"/>
+    <summary>Down since 2026-11-26T17:02:02.549Z (93 failed checks).</summary>
+  </entry>
   <entry>
     <id>tag:watchtower,2026:calm-space-z5942:down:2026-11-26T17:02:02.549Z</id>
     <title>Calm Space is down: HTTP 503 (service unavailable)</title>
