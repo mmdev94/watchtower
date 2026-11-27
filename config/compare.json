@@ -1,0 +1,12 @@
+{
+  "about": "Pages measured side by side: the same page, built from the same commit, on ms.computer and on another host. Each run measures each pair three times, alternating which host goes first.",
+  "pairs": [
+    {
+      "id": "shipyard-test",
+      "name": "Shipyard's test page",
+      "repo": "mmdev94/shipyard-test",
+      "ms": "https://shipyard-test-r3602.ms.computer/",
+      "other": { "host": "GitHub Pages", "url": "https://mmdev94.github.io/shipyard-test/" }
+    }
+  ]
+}

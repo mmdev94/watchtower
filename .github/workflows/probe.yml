@@ -22,6 +22,8 @@ on:
       - scripts/probe.ts
       - scripts/alerts.ts
       - scripts/deploys.ts
+      - scripts/compare.ts
+      - config/compare.json
       - src/lib/feed.ts
       - src/lib/model.ts
       - src/lib/badge.ts
@@ -77,6 +79,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: node --experimental-strip-types scripts/alerts.ts --out out
+
+      - name: Measure side by side (ms.computer and GitHub Pages, same page)
+        continue-on-error: true
+        run: node --experimental-strip-types scripts/compare.ts --out out
 
       - name: Measure push → live for Shipyard deploys (hourly)
         # a problem here must never stop the uptime data being saved
