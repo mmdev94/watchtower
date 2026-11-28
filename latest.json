@@ -1,15 +1,15 @@
 {
  "v": 1,
- "at": "2026-11-28T00:41:37.280Z",
+ "at": "2026-11-28T00:46:40.851Z",
  "run": {
-  "id": "46089223810",
+  "id": "46089688149",
   "attempt": 1,
-  "url": "https://github.com/mmdev94/watchtower/actions/runs/46089223810"
+  "url": "https://github.com/mmdev94/watchtower/actions/runs/46089688149"
  },
  "sha": "39a47cf596b4a80d45d7c4d0d31ba57f47c6800f",
  "control": {
   "ok": true,
-  "ms": 13,
+  "ms": 59,
   "error": null
  },
  "checks": [
@@ -21,13 +21,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 261,
+   "total": 332,
    "error": null,
-   "ttfb": 261,
-   "dns": 45,
-   "connect": 53,
-   "tls": 94,
-   "wait": 167
+   "ttfb": 330,
+   "dns": 149,
+   "connect": 159,
+   "tls": 176,
+   "wait": 155
   },
   {
    "url": "https://the-1024-g4125.ms.computer",
@@ -37,13 +37,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 296,
+   "total": 385,
    "error": null,
-   "ttfb": 296,
-   "dns": 30,
-   "connect": 38,
-   "tls": 77,
-   "wait": 219
+   "ttfb": 384,
+   "dns": 142,
+   "connect": 148,
+   "tls": 159,
+   "wait": 225
   },
   {
    "url": "https://nexus24-a9829.ms.computer",
@@ -53,13 +53,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 459,
+   "total": 576,
    "error": null,
-   "ttfb": 456,
-   "dns": 37,
-   "connect": 40,
-   "tls": 79,
-   "wait": 377
+   "ttfb": 573,
+   "dns": 357,
+   "connect": 363,
+   "tls": 375,
+   "wait": 198
   },
   {
    "url": "https://deploy-doctor-d1556.ms.computer",
@@ -69,13 +69,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 243,
+   "total": 601,
    "error": null,
-   "ttfb": 242,
-   "dns": 79,
-   "connect": 80,
-   "tls": 86,
-   "wait": 156
+   "ttfb": 600,
+   "dns": 410,
+   "connect": 418,
+   "tls": 429,
+   "wait": 171
   },
   {
    "url": "https://taodrop-x2274.ms.computer",
@@ -85,13 +85,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 290,
+   "total": 575,
    "error": null,
-   "ttfb": 257,
-   "dns": 10,
-   "connect": 12,
-   "tls": 18,
-   "wait": 238
+   "ttfb": 541,
+   "dns": 296,
+   "connect": 302,
+   "tls": 312,
+   "wait": 229
   },
   {
    "url": "https://taoradar-c3561.ms.computer",
@@ -101,13 +101,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 251,
+   "total": 579,
    "error": null,
-   "ttfb": 215,
-   "dns": 6,
-   "connect": 8,
-   "tls": 15,
-   "wait": 200
+   "ttfb": 496,
+   "dns": 252,
+   "connect": 258,
+   "tls": 269,
+   "wait": 226
   },
   {
    "url": "https://chrono-n2732.ms.computer",
@@ -117,13 +117,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 376,
+   "total": 611,
    "error": null,
-   "ttfb": 368,
-   "dns": 6,
-   "connect": 9,
-   "tls": 16,
-   "wait": 352
+   "ttfb": 603,
+   "dns": 279,
+   "connect": 286,
+   "tls": 301,
+   "wait": 302
   },
   {
    "url": "https://calm-space-z5942.ms.computer",
@@ -133,13 +133,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 178,
+   "total": 404,
    "error": null,
-   "ttfb": 175,
-   "dns": 6,
-   "connect": 9,
-   "tls": 17,
-   "wait": 157
+   "ttfb": 403,
+   "dns": 220,
+   "connect": 226,
+   "tls": 242,
+   "wait": 161
   },
   {
    "url": "https://sn24-explained-x6656.ms.computer",
@@ -149,13 +149,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 291,
+   "total": 324,
    "error": null,
-   "ttfb": 288,
-   "dns": 7,
-   "connect": 10,
-   "tls": 18,
-   "wait": 270
+   "ttfb": 322,
+   "dns": 69,
+   "connect": 75,
+   "tls": 86,
+   "wait": 237
   },
   {
    "url": "https://full-rack-h1272.ms.computer",
@@ -165,13 +165,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 190,
+   "total": 341,
    "error": null,
-   "ttfb": 183,
-   "dns": 7,
-   "connect": 9,
-   "tls": 15,
-   "wait": 168
+   "ttfb": 332,
+   "dns": 14,
+   "connect": 20,
+   "tls": 33,
+   "wait": 299
   },
   {
    "url": "https://slime-atlas-f8729.ms.computer",
@@ -181,13 +181,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 206,
+   "total": 431,
    "error": null,
-   "ttfb": 172,
-   "dns": 7,
-   "connect": 9,
-   "tls": 14,
-   "wait": 157
+   "ttfb": 398,
+   "dns": 13,
+   "connect": 18,
+   "tls": 30,
+   "wait": 368
   },
   {
    "url": "https://one-line-b7794.ms.computer",
@@ -197,13 +197,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 300,
+   "total": 493,
    "error": null,
-   "ttfb": 293,
-   "dns": 5,
-   "connect": 8,
-   "tls": 16,
-   "wait": 277
+   "ttfb": 487,
+   "dns": 161,
+   "connect": 168,
+   "tls": 182,
+   "wait": 305
   },
   {
    "url": "https://web-rewind-v0341.ms.computer",
@@ -213,13 +213,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 174,
+   "total": 185,
    "error": null,
-   "ttfb": 174,
-   "dns": 6,
-   "connect": 8,
-   "tls": 15,
-   "wait": 158
+   "ttfb": 183,
+   "dns": 17,
+   "connect": 24,
+   "tls": 34,
+   "wait": 149
   },
   {
    "url": "https://imprint-r4756.ms.computer",
@@ -229,12 +229,12 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 173,
+   "total": 188,
    "error": null,
-   "ttfb": 172,
-   "dns": 6,
-   "connect": 9,
-   "tls": 16,
+   "ttfb": 187,
+   "dns": 16,
+   "connect": 22,
+   "tls": 31,
    "wait": 156
   },
   {
@@ -245,13 +245,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 276,
+   "total": 208,
    "error": null,
-   "ttfb": 273,
-   "dns": 7,
-   "connect": 8,
-   "tls": 14,
-   "wait": 260
+   "ttfb": 204,
+   "dns": 16,
+   "connect": 22,
+   "tls": 33,
+   "wait": 172
   },
   {
    "url": "https://three-frames-z4449.ms.computer",
@@ -261,13 +261,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 300,
+   "total": 613,
    "error": null,
-   "ttfb": 300,
-   "dns": 6,
-   "connect": 9,
-   "tls": 15,
-   "wait": 285
+   "ttfb": 613,
+   "dns": 194,
+   "connect": 200,
+   "tls": 210,
+   "wait": 403
   },
   {
    "url": "https://taonoise-m9728.ms.computer",
@@ -277,13 +277,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 164,
+   "total": 204,
    "error": null,
-   "ttfb": 159,
-   "dns": 5,
-   "connect": 9,
-   "tls": 15,
-   "wait": 145
+   "ttfb": 197,
+   "dns": 14,
+   "connect": 20,
+   "tls": 30,
+   "wait": 168
   },
   {
    "url": "https://agentmart-e0613.ms.computer",
@@ -293,13 +293,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 188,
+   "total": 204,
    "error": null,
-   "ttfb": 182,
-   "dns": 6,
-   "connect": 8,
-   "tls": 14,
-   "wait": 168
+   "ttfb": 199,
+   "dns": 18,
+   "connect": 24,
+   "tls": 34,
+   "wait": 164
   },
   {
    "url": "https://jmercury-j7764.ms.computer",
@@ -309,12 +309,12 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 147,
+   "total": 394,
    "error": null,
-   "ttfb": 141,
-   "dns": 5,
-   "connect": 7,
-   "tls": 13,
+   "ttfb": 378,
+   "dns": 232,
+   "connect": 239,
+   "tls": 250,
    "wait": 128
   },
   {
@@ -325,13 +325,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 213,
+   "total": 242,
    "error": null,
-   "ttfb": 179,
-   "dns": 5,
-   "connect": 7,
-   "tls": 13,
-   "wait": 166
+   "ttfb": 207,
+   "dns": 11,
+   "connect": 17,
+   "tls": 32,
+   "wait": 175
   },
   {
    "url": "https://shipyard-h0413.ms.computer",
@@ -341,13 +341,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 179,
+   "total": 198,
    "error": null,
-   "ttfb": 179,
-   "dns": 5,
-   "connect": 7,
-   "tls": 16,
-   "wait": 162
+   "ttfb": 198,
+   "dns": 13,
+   "connect": 19,
+   "tls": 30,
+   "wait": 169
   },
   {
    "url": "https://ms-test-c6339.ms.computer",
@@ -357,13 +357,13 @@
    "tries": 1,
    "up": true,
    "status": 200,
-   "total": 179,
+   "total": 436,
    "error": null,
-   "ttfb": 178,
-   "dns": 6,
-   "connect": 8,
-   "tls": 15,
-   "wait": 163
+   "ttfb": 436,
+   "dns": 249,
+   "connect": 255,
+   "tls": 265,
+   "wait": 171
   }
  ]
 }
