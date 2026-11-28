@@ -4,8 +4,15 @@
   <title>Watchtower: ms.computer outages and downtime</title>
   <link rel="self" href="https://raw.githubusercontent.com/mmdev94/watchtower/data/feeds/all.xml"/>
   <link rel="alternate" href="https://watchtower-p1988.ms.computer/#/"/>
-  <updated>2026-11-28T00:31:11.176Z</updated>
+  <updated>2026-11-28T00:51:48.414Z</updated>
   <author><name>Watchtower</name></author>
+  <entry>
+    <id>tag:watchtower,2026:jmercury-j7764:down:2026-11-28T00:51:48.414Z</id>
+    <title>J Mercury is down: HTTP 503 (service unavailable)</title>
+    <updated>2026-11-28T00:51:48.414Z</updated>
+    <link href="https://watchtower-p1988.ms.computer/#/site/jmercury-j7764"/>
+    <summary>Watchtower’s check got HTTP 503 (service unavailable), twice, 5 seconds apart.</summary>
+  </entry>
   <entry>
     <id>tag:watchtower,2026:jmercury-j7764:up:2026-11-28T00:26:06.973Z</id>
     <title>J Mercury is back up after 5 min</title>
@@ -697,13 +704,6 @@
     <title>Calm Space is down: HTTP 503 (service unavailable)</title>
     <updated>2026-11-26T17:02:02.549Z</updated>
     <link href="https://watchtower-p1988.ms.computer/#/site/calm-space-z5942"/>
-    <summary>Watchtower’s check got HTTP 503 (service unavailable), twice, 5 seconds apart.</summary>
-  </entry>
-  <entry>
-    <id>tag:watchtower,2026:jmercury-j7764:down:2026-11-26T17:02:02.549Z</id>
-    <title>J Mercury is down: HTTP 503 (service unavailable)</title>
-    <updated>2026-11-26T17:02:02.549Z</updated>
-    <link href="https://watchtower-p1988.ms.computer/#/site/jmercury-j7764"/>
     <summary>Watchtower’s check got HTTP 503 (service unavailable), twice, 5 seconds apart.</summary>
   </entry>
 </feed>
