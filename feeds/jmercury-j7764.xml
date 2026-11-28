@@ -4,8 +4,15 @@
   <title>Watchtower: J Mercury</title>
   <link rel="self" href="https://raw.githubusercontent.com/mmdev94/watchtower/data/feeds/jmercury-j7764.xml"/>
   <link rel="alternate" href="https://watchtower-p1988.ms.computer/#/site/jmercury-j7764"/>
-  <updated>2026-11-28T03:26:42.134Z</updated>
+  <updated>2026-11-28T03:41:57.640Z</updated>
   <author><name>Watchtower</name></author>
+  <entry>
+    <id>tag:watchtower,2026:jmercury-j7764:up:2026-11-28T03:26:42.134Z</id>
+    <title>J Mercury is back up after 15 min</title>
+    <updated>2026-11-28T03:41:57.640Z</updated>
+    <link href="https://watchtower-p1988.ms.computer/#/site/jmercury-j7764"/>
+    <summary>Down since 2026-11-28T03:26:42.134Z (3 failed checks).</summary>
+  </entry>
   <entry>
     <id>tag:watchtower,2026:jmercury-j7764:down:2026-11-28T03:26:42.134Z</id>
     <title>J Mercury is down: HTTP 503 (service unavailable)</title>
@@ -698,12 +705,5 @@
     <updated>2026-11-26T20:35:12.970Z</updated>
     <link href="https://watchtower-p1988.ms.computer/#/site/jmercury-j7764"/>
     <summary>Watchtower’s check got HTTP 503 (service unavailable), twice, 5 seconds apart.</summary>
-  </entry>
-  <entry>
-    <id>tag:watchtower,2026:jmercury-j7764:up:2026-11-26T20:09:30.407Z</id>
-    <title>J Mercury is back up after 15 min</title>
-    <updated>2026-11-26T20:24:56.490Z</updated>
-    <link href="https://watchtower-p1988.ms.computer/#/site/jmercury-j7764"/>
-    <summary>Down since 2026-11-26T20:09:30.407Z (3 failed checks).</summary>
   </entry>
 </feed>
